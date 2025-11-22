@@ -47,13 +47,13 @@ module.exports.registerUser = async (req, res, next) => {
         });
 
         // console.log(user, "user")
-        const token = user.generateAuthToken();
+        // const token = user.generateAuthToken();
         // console.log("token", token)
-        res.cookie(token);
+        // res.cookie(token);
 
         res.status(201).json({
             success: true,
-            token: token,
+            // token: token,
             data: user,
             message: "User created successfully",
         })
@@ -63,6 +63,140 @@ module.exports.registerUser = async (req, res, next) => {
     }
 }
 
-// module.exports.loginUser = async (req, res, next) => {
+module.exports.loginUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.log(errors.array())
+        return res.status(400).json({
+            "success": false,
+            "message": "Email and password are required"
+        })
+    }
 
-// }
+    const { email, password } = req.body
+
+    const user = await userModel.findOne({ email: email })
+
+    if (!user) {
+        return res.status({
+            "success": false,
+            "message": "User does not exist with this email"
+        })
+    }
+
+    const isPasswordMatch = await user.comparePassword(password);
+
+    if (!isPasswordMatch) {
+        return res.status(401).json({
+            "success": false,
+            "message": "Invalid password"
+        })
+    }
+
+    const token = await user.generateAuthToken();
+
+    res.cookie("accessToken", token);
+
+    res.status(200).json({
+        "success": true,
+        "data": {
+            "user": user,
+            "accessToken": token,
+        },
+        "message": "User logged in successfully"
+    })
+}
+
+module.exports.logoutUser = (req, res, next) => {
+
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+        res.status(401).json({
+            "success": false,
+            "message": "Invalid access token"
+        })
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) {
+        return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    try {
+        res.clearCookie("accessToken");
+        return res.status(200).json({
+            success: true,
+            message: "User logged out",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error during logout process",
+        });
+    }
+}
+
+module.exports.userProfile = async (req, res, next) => {
+    const token = req.cookies.accessToken
+
+    if (!token) {
+        return res.status(401).json({
+            "success": false,
+            "message": "Invalid access token"
+        })
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    if (!decoded) {
+        return res.status(401).json({ message: "Unauthorized" })
+    }
+    // console.log(id)
+    const user = await userModel.findById(decoded._id);
+
+    res.status(200).json({
+        "success": true,
+        "data": user,
+        "message": "User fetched successfully"
+    })
+}
+
+module.exports.userSearch = async (req, res, next) => {
+    // const token = req.cookies.accessToken || req.headers.authorization.split(" ")[1];
+    // const token = req.headers.Cookie.split('=')[1];
+    const token = req.cookies.accessToken;
+
+
+    if (!token) {
+        return res.status(401).json({
+            "success": false,
+            "message": "Invalid access token"
+        })
+    }
+
+    const searchTerm = req.query.searchTerm;
+
+    if (!searchTerm) {
+        return res.status(400).json({
+            "success": false,
+            "message": "Search term is required"
+        })
+    }
+
+    const searchResults = await userModel.find({
+        $or: [
+            { name: { $regex: searchTerm, $options: "i" } },
+            { email: { $regex: searchTerm, $options: "i" } },
+            { username: { $regex: searchTerm, $options: "i" } },
+        ]
+    });
+    // console.log(searchResults)
+    res.status(200).json({
+        "success": true,
+        "data": searchResults,
+        "message": "Users fetched successfully"
+    })
+
+}

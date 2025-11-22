@@ -3,6 +3,7 @@ const express = require('express')
 const dotenv = require("dotenv")
 const connecToDB = require('./db/db')
 const userRouter = require('./routes/user.route')
+const roomRouter = require('./routes/room.route')
 const cookieParser = require('cookie-parser')
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/users', userRouter);
+app.use('/api/rooms', roomRouter);
 
 app.listen(PORT, () => {
     console.log('server is running at PORT ', PORT)
