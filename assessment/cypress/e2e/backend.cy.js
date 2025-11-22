@@ -44,17 +44,17 @@ describe("Backend API Tests", () => {
       url: "/api/users/register",
       body: testUser,
     }).then(() => {
-        cy.backendRequest({
-            method: "POST",
-            url: "/api/users/register",
-            body: testUser,
-            failOnStatusCode: false,
-        }).then((response) => {
+      cy.backendRequest({
+        method: "POST",
+        url: "/api/users/register",
+        body: testUser,
+        failOnStatusCode: false,
+      }).then((response) => {
         expect(response.status).to.eq(409);
         expect(response.body.success).to.be.false;
-        });
+      });
     })
-    
+
   });
 
   it("should login via API and receive token", () => {
