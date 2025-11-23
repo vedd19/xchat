@@ -7,12 +7,15 @@ import { Login } from './pages/Login.jsx'
 import { Register } from './pages/Register.jsx'
 import { Home } from './pages/Home.jsx'
 import UserContext from '../context/UserContext.jsx'
+import { SnackbarProvider, useSnackbar } from 'notistack'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <UserContext>
-      <App />
+      <SnackbarProvider>
+        <App />
+      </SnackbarProvider>
     </UserContext>,
     children: [
       {

@@ -1,6 +1,6 @@
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import React from 'react'
+import React, { useContext } from 'react'
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import { CiAt } from "react-icons/ci";
 import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
@@ -9,9 +9,65 @@ import { AiFillMessage } from 'react-icons/ai';
 import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { UserDataContext } from '../../context/UserDataCOntext';
+import { useSnackbar } from 'notistack';
+import { config } from '../config';
+import { useNavigate } from 'react-router-dom';
 
 
 export const Register = () => {
+
+    const { enqueueSnackbar } = useSnackbar();
+    const navigate = useNavigate();
+
+    const { userData, setUserData } = useContext(UserDataContext);
+
+    const handleInputChange = (e) => {
+        setUserData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    };
+
+
+    const handleRegistration = async (e) => {
+        e.preventDefault();
+
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email);
+
+        if (!isValid) {
+            enqueueSnackbar("please enter a valid email", { variant: "warning" });
+            return;
+        }
+
+        try {
+            const payload = { ...userData };
+            const response = await fetch(`${config.BACKEND_URL}/api/users/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...payload
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.status === 201) {
+
+                console.log(userData)
+                console.log(data)
+                enqueueSnackbar("Registration successful", { variant: "success" });
+                navigate('/login')
+            }
+            else {
+                enqueueSnackbar(data.message, { variant: "warning" });
+            }
+
+        } catch (err) {
+            console.error("error while registration", err)
+        }
+    }
+
     return (
         <div className='h-screen flex justify-center items-center'>
 
@@ -24,7 +80,7 @@ export const Register = () => {
                 </div>
 
                 <div>
-                    <form className='flex flex-col gap-5'>
+                    <form onSubmit={handleRegistration} className='flex flex-col gap-5'>
                         <div>
                             <Typography variant='body1'>Full Name</Typography>
                             <TextField
@@ -37,9 +93,13 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                value={userData.fullName}
+                                onChange={handleInputChange}
                                 variant='outlined'
+                                name='fullName'
                                 placeholder='Your full name'
                                 fullWidth
+                                required
                             />
                         </div>
 
@@ -55,9 +115,13 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                value={userData.email}
+                                onChange={handleInputChange}
+                                name='email'
                                 variant='outlined'
                                 placeholder='name@example.com'
                                 fullWidth
+                                required
                             />
                         </div>
 
@@ -73,9 +137,13 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                value={userData.username}
+                                onChange={handleInputChange}
+                                name='username'
                                 variant='outlined'
                                 placeholder='Choose a username'
                                 fullWidth
+                                required
                             />
                         </div>
 
@@ -91,9 +159,14 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                type='password'
                                 variant='outlined'
+                                value={userData.password}
+                                onChange={handleInputChange}
+                                name='password'
                                 placeholder='Choose a strong password'
                                 fullWidth
+                                required
                             />
                         </div>
 

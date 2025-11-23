@@ -5,6 +5,7 @@ const connecToDB = require('./db/db')
 const userRouter = require('./routes/user.route')
 const roomRouter = require('./routes/room.route')
 const cookieParser = require('cookie-parser')
+const cors = require('cors');
 
 dotenv.config();
 const app = express()
@@ -13,6 +14,10 @@ connecToDB();
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors({
+    origin: "*",
+    credentials: true
+}))
 
 
 const PORT = process.env.PORT || 5000

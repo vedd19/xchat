@@ -1,16 +1,65 @@
 import Modal from '@mui/material/Modal'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { UserDataContext } from '../../context/UserDataCOntext'
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import TextField from '@mui/material/TextField';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import InputAdornment from '@mui/material/InputAdornment';
+import { config } from '../config';
+import axios from 'axios';
+import { enqueueSnackbar } from 'notistack';
+import { SearchResultCard } from './SearchResultCard';
 
 
 
 export const SearchModal = () => {
 
-    const { modelOpen, handleModalClose } = useContext(UserDataContext);
+    const [searchValue, setSearchValue] = useState("");
+
+    const { searchResults, setSearchResults, setUserChat, userChat, openNewChat, setOpenNewChat, modelOpen, handleModalClose } = useContext(UserDataContext)
+
+    const handleSearchInput = (e) => {
+        setSearchValue(e.target.value);
+    }
+
+    useEffect(() => {
+
+        if (!searchValue) {
+            return;
+        }
+
+        const timerId = setTimeout(() => {
+            async function search() {
+                try {
+                    const response = await fetch(`${config.BACKEND_URL}/api/users/search?searchTerm=${searchValue}`, {
+                        // credentials: 'include',
+                        headers: {
+                            Authorization: `bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    if (response.status === 200) {
+                        const data = await response.json();
+                        setSearchResults(data.data)
+                    }
+                    else {
+                        enqueueSnackbar(response.json().message, { variant: 'error' })
+                    }
+                }
+                catch (err) {
+                    console.error("error while fetchin search users", err)
+                }
+            }
+
+            search();
+        })
+
+        return () => clearTimeout(timerId);
+
+    }, [searchValue])
+
+
+
+
 
 
     return (
@@ -30,6 +79,7 @@ export const SearchModal = () => {
                     <div className="bg-white p-3">
                         <div className="">
                             <TextField
+                                onChange={handleSearchInput}
                                 slotProps={{
                                     input: {
                                         startAdornment: (< InputAdornment position='start'>
@@ -45,16 +95,9 @@ export const SearchModal = () => {
                         </div>
 
 
-                        <div className="">
-                            <div className='rounded-[50%]'>
-                                <img height="100%" src="" alt="" />
-                            </div>
-                            <div className='text-gray-500 flex flex-col'>
-                                <p>name</p>
-                                <p>username</p>
-                                <p>email</p>
-                            </div>
-                        </div>
+                        {searchResults.map((ele) => (
+                            <SearchResultCard ele={ele} />
+                        ))}
 
                     </div>
 

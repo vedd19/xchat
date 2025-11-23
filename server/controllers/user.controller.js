@@ -166,7 +166,7 @@ module.exports.userProfile = async (req, res, next) => {
 module.exports.userSearch = async (req, res, next) => {
     // const token = req.cookies.accessToken || req.headers.authorization.split(" ")[1];
     // const token = req.headers.Cookie.split('=')[1];
-    const token = req.cookies.accessToken;
+    const token = req.cookies.accessToken || req.headers.authorization.split(" ")[1];
 
 
     if (!token) {

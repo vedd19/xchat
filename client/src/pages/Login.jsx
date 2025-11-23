@@ -1,14 +1,75 @@
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import React from 'react'
+import React, { useContext } from 'react'
 import { AiFillMessage } from "react-icons/ai";
 import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
+import { UserDataContext } from '../../context/UserDataCOntext';
+import { useSnackbar } from 'notistack';
+import { config } from '../config';
+import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
+
+    const { loginData, setLoginData } = useContext(UserDataContext)
+    const { enqueueSnackbar } = useSnackbar()
+    const navigate = useNavigate();
+
+    const handleInputChange = (e) => {
+        setLoginData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    }
+
+    const handleLogin = async (e) => {
+
+        e.preventDefault()
+
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginData.email);
+
+        if (!isValid) {
+            enqueueSnackbar("please enter a valid email", { variant: "warning" });
+            return;
+        }
+
+        try {
+            const payload = { ...loginData };
+            const response = await fetch(`${config.BACKEND_URL}/api/users/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...payload
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.status === 200) {
+
+                console.log(loginData)
+                console.log(data)
+                console.log(data.data.accessToken)
+                localStorage.setItem('token', data.data.accessToken)
+                localStorage.setItem('username', data.data.user.username)
+                localStorage.setItem('email', data.data.user.email)
+                localStorage.setItem('fullName', data.data.user.fullName)
+                localStorage.setItem('avatar', data.data.user.avatar)
+                enqueueSnackbar("Login successful", { variant: "success" });
+                navigate('/')
+            }
+            else {
+                enqueueSnackbar(data.message, { variant: "warning" });
+            }
+
+        } catch (err) {
+            console.error("error while Login", err)
+        }
+    }
+
+
     return (
         <div className='h-screen flex justify-center items-center'>
 
@@ -21,7 +82,7 @@ export const Login = () => {
                 </div>
 
                 <div>
-                    <form className='flex flex-col gap-5'>
+                    <form onSubmit={handleLogin} className='flex flex-col gap-5'>
                         <div>
                             <Typography variant='body1'>Email address</Typography>
                             <TextField
@@ -34,9 +95,12 @@ export const Login = () => {
                                     }
                                 }
                                 }
+                                name='email'
+                                onChange={handleInputChange}
                                 variant='outlined'
                                 placeholder='name@example.com'
                                 fullWidth
+                                required
                             />
                         </div>
 
@@ -52,9 +116,12 @@ export const Login = () => {
                                     }
                                 }
                                 }
+                                name='password'
+                                onChange={handleInputChange}
                                 variant='outlined'
                                 placeholder='Enter your password'
                                 fullWidth
+                                required
                             />
                         </div>
 
