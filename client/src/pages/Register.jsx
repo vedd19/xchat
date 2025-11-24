@@ -10,7 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { UserDataContext } from '../../context/UserDataCOntext';
+import { UserDataContext } from '../../context/UserDataContext';
 import { useSnackbar } from 'notistack';
 import { config } from '../config';
 import { useNavigate } from 'react-router-dom';
