@@ -7,20 +7,24 @@ import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
-import { UserDataContext } from '../../context/UserDataCOntext';
+import { UserDataContext } from '../../context/UserDataContext';
 import { useSnackbar } from 'notistack';
 import { config } from '../config';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export const Login = () => {
 
-    const { loginData, setLoginData } = useContext(UserDataContext)
+    const { loginData, setLoginData, loggedinUser, setLoggedinUser } = useContext(UserDataContext)
     const { enqueueSnackbar } = useSnackbar()
     const navigate = useNavigate();
+    const [loginError, setLoginError] = useState("");
 
     const handleInputChange = (e) => {
         setLoginData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
+
+
 
     const handleLogin = async (e) => {
 
@@ -51,17 +55,21 @@ export const Login = () => {
 
                 console.log(loginData)
                 console.log(data)
-                console.log(data.data.accessToken)
-                localStorage.setItem('token', data.data.accessToken)
-                localStorage.setItem('username', data.data.user.username)
-                localStorage.setItem('email', data.data.user.email)
-                localStorage.setItem('fullName', data.data.user.fullName)
-                localStorage.setItem('avatar', data.data.user.avatar)
+                setLoggedinUser(data.data);
+                // console.log(data.data.accessToken)
+                localStorage.setItem('token', data.data.accessToken);
+                localStorage.setItem('fullName', data.data.user.fullName);
+                localStorage.setItem('avatar', data.data.user.avatar);
+                localStorage.setItem('username', data.data.user.username);
+                localStorage.setItem('id', data.data.user._id);
                 enqueueSnackbar("Login successful", { variant: "success" });
                 navigate('/')
             }
             else {
-                enqueueSnackbar(data.message, { variant: "warning" });
+                setLoginError(data.message);
+                enqueueSnackbar(data.message, {
+                    variant: "warning"
+                });
             }
 
         } catch (err) {
@@ -70,8 +78,10 @@ export const Login = () => {
     }
 
 
+
+
     return (
-        <div className='h-screen flex justify-center items-center'>
+        <div className='h-screen flex justify-center items-center' id='login-page'>
 
             <div className='w-[500px] flex flex-col gap-5 shadow-2xl/30 rounded-xl px-8 py-8' style={{}}>
                 <div className='flex justify-center flex-col items-center gap-3'>
@@ -95,6 +105,8 @@ export const Login = () => {
                                     }
                                 }
                                 }
+                                type='email'
+                                id='email-input'
                                 name='email'
                                 onChange={handleInputChange}
                                 variant='outlined'
@@ -116,6 +128,8 @@ export const Login = () => {
                                     }
                                 }
                                 }
+                                type='password'
+                                id='password-input'
                                 name='password'
                                 onChange={handleInputChange}
                                 variant='outlined'
@@ -125,13 +139,17 @@ export const Login = () => {
                             />
                         </div>
 
-                        <Button type='submit' variant='contained' color='primary'>Sign in</Button>
+                        <Button id='login-button' type='submit' variant='contained' color='primary'>Sign in</Button>
 
                         <Typography sx={{ textAlign: 'center' }} variant='body2'>Don't have an account? <Link to='/register' className='text-blue-500 cursor-pointer' >Sign up</Link></Typography>
 
                     </form>
                 </div>
             </div >
+
+            {loginError && <div id="login-error" className="absolute left-0 bottom-0 text-red-500 mt-4 text-center">
+                {loginError}
+            </div>}
         </div >
     )
 }

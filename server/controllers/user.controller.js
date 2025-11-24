@@ -78,7 +78,7 @@ module.exports.loginUser = async (req, res, next) => {
     const user = await userModel.findOne({ email: email })
 
     if (!user) {
-        return res.status({
+        return res.status(404).json({
             "success": false,
             "message": "User does not exist with this email"
         })
@@ -109,7 +109,7 @@ module.exports.loginUser = async (req, res, next) => {
 
 module.exports.logoutUser = (req, res, next) => {
 
-    const token = req.cookies.accessToken;
+    const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
         res.status(401).json({
@@ -118,13 +118,18 @@ module.exports.logoutUser = (req, res, next) => {
         })
     }
 
+    console.log(token)
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded) {
         return res.status(401).json({ message: "Unauthorized" })
     }
 
+    console.log(decoded)
+
     try {
+
         res.clearCookie("accessToken");
         return res.status(200).json({
             success: true,
@@ -134,6 +139,7 @@ module.exports.logoutUser = (req, res, next) => {
         return res.status(500).json({
             success: false,
             message: "Error during logout process",
+            error: error
         });
     }
 }
@@ -199,4 +205,23 @@ module.exports.userSearch = async (req, res, next) => {
         "message": "Users fetched successfully"
     })
 
+}
+
+module.exports.userDetails = async (req, res, next) => {
+    const token = req.cookies.accessToken || req.headers.authorization.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({
+            "success": false,
+            "message": "Invalid access token"
+        })
+    }
+
+    const userId = req.query.userId;
+
+    const userDetails = await userModel.findById(userId);
+    res.status(200).json({
+        "success": true,
+        "data": userDetails,
+        "message": "User details fetched successfully"
+    });
 }

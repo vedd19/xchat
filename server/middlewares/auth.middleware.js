@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../models/user.model')
 
 module.exports.authMiddleware = async (req, res, next) => {
-    const token = req.cookies?.accessToken || req.headers.cookie?.split("=")[1];
+    const token = req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
         return res.status(401).json({
@@ -25,6 +25,9 @@ module.exports.authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
-        return res.status(401).json({ message: "Invalid or expired token" });
+        return res.status(401).json({
+            message: "Invalid or expired token",
+            error: err
+        });
     }
 }

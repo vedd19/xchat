@@ -1,11 +1,26 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Sidebar } from '../components/Sidebar'
 import { EmptyChat } from '../components/EmptyChat'
-import { UserDataContext } from '../../context/UserDataCOntext'
+import { UserDataContext } from '../../context/UserDataContext'
 import { ActiveChat } from '../components/ActiveChat'
+import { Link, useNavigate } from 'react-router-dom'
+import { Login } from './Login'
 
 export const Home = () => {
     const { openNewChat } = useContext(UserDataContext)
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!localStorage.getItem('token')) {
+            navigate('/login');
+        }
+
+    }, [])
+    // if (!) {
+    //     navigate('/login');
+    //     return;
+    // }
+
     return (
         <div className="flex">
             <div className='h-screen'>

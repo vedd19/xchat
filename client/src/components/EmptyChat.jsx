@@ -4,7 +4,7 @@ import { BsChatSquareTextFill } from "react-icons/bs";
 
 export const EmptyChat = ({ isUser }) => {
     return (
-        <div className='h-full'>
+        <div className='h-full' id='chat-layout'>
             <div className="h-full flex flex-col justify-center items-center">
                 <div className='w-[4rem] h-[4rem] bg-blue-200 rounded-[50%] flex justify-center items-center'>
                     {isUser ? (<IoChatbubbleEllipsesOutline size={'small'} className=' text-blue-500 p-3' />) : (<BsChatSquareTextFill

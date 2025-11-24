@@ -14,12 +14,15 @@ import { UserDataContext } from '../../context/UserDataCOntext';
 import { useSnackbar } from 'notistack';
 import { config } from '../config';
 import { useNavigate } from 'react-router-dom';
+import { set } from 'firebase/database';
+import { useState } from 'react';
 
 
 export const Register = () => {
 
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
+    const [registerError, setRegisterError] = useState("");
 
     const { userData, setUserData } = useContext(UserDataContext);
 
@@ -60,7 +63,10 @@ export const Register = () => {
                 navigate('/login')
             }
             else {
-                enqueueSnackbar(data.message, { variant: "warning" });
+                setRegisterError(data.message);
+                enqueueSnackbar(data.message, {
+                    variant: "warning"
+                });
             }
 
         } catch (err) {
@@ -69,7 +75,7 @@ export const Register = () => {
     }
 
     return (
-        <div className='h-screen flex justify-center items-center'>
+        <div className='h-screen flex justify-center items-center' id='register-page'>
 
             <div className='w-[500px] flex flex-col gap-5 shadow-2xl/30 rounded-xl px-8 py-8' style={{}}>
                 <div className='flex justify-center flex-col items-center gap-3'>
@@ -93,6 +99,7 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                id='fullname-input'
                                 value={userData.fullName}
                                 onChange={handleInputChange}
                                 variant='outlined'
@@ -115,6 +122,7 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                id='email-input'
                                 value={userData.email}
                                 onChange={handleInputChange}
                                 name='email'
@@ -137,6 +145,7 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                id='username-input'
                                 value={userData.username}
                                 onChange={handleInputChange}
                                 name='username'
@@ -159,6 +168,7 @@ export const Register = () => {
                                     }
                                 }
                                 }
+                                id='password-input'
                                 type='password'
                                 variant='outlined'
                                 value={userData.password}
@@ -170,13 +180,17 @@ export const Register = () => {
                             />
                         </div>
 
-                        <Button type='submit' variant='contained' color='primary'>Create Account</Button>
+                        <Button id='register-button' type='submit' variant='contained' color='primary'>Create Account</Button>
 
                         <Typography sx={{ textAlign: 'center' }} variant='body2'>Already have an accout? <Link to='/login' className='text-blue-500 cursor-pointer' >Sign in</Link></Typography>
 
                     </form>
                 </div>
             </div >
+
+            {registerError && <div id="register-error" className="absolute left-0 bottom-0 text-red-500 mt-4 text-center">
+                {registerError}
+            </div>}
         </div >
     )
 }

@@ -8,6 +8,8 @@ import { Register } from './pages/Register.jsx'
 import { Home } from './pages/Home.jsx'
 import UserContext from '../context/UserContext.jsx'
 import { SnackbarProvider, useSnackbar } from 'notistack'
+import { useNavigate } from 'react-router-dom'
+
 
 const router = createBrowserRouter([
   {
