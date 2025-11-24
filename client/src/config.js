@@ -1,1 +1,1 @@
-export const config = { BACKEND_URL: "http://localhost:5000" };
+export const config = { BACKEND_URL: "https://xchat-k9wi.onrender.com" };
